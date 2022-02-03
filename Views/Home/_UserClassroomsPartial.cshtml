@@ -1,0 +1,33 @@
+﻿@model AftebiClassroom.ViewModels.HomeViewModel
+@inject Microsoft.AspNetCore.Identity.UserManager<AppUser> _userManager
+<h4>Your Classrooms</h4>
+@if (Model.UserClassrooms.Count() == 0)
+{
+    <span class="text-muted">You aren't enrolled in any classroom currently. Check notifications for invites or Create a classroom right now!</span><br/>
+}
+<a asp-controller="Classroom" asp-action="Create">Create a new classroom</a>
+<br />
+<br />
+
+@foreach (ClassroomUser classUser in Model.UserClassrooms)
+{
+
+    AppUser user = await _userManager.FindByIdAsync(classUser.Classroom.AppUserID);
+    <div class="card text-dark bg-white mr-4 mb-4">
+        <div class="card-header">Class created by <b>@user</b></div>
+        <div class="card-body">
+            <h5 class="card-title">@classUser.Classroom.title</h5>
+            @CustomHelpers.DisplayWithLinksFor(classUser.Classroom.description)
+            <span class="text-info">You're a <b>@classUser.Role</b> in this classroom</span>
+        </div>
+        <hr />
+        <div class="card-body">
+            <a class="card-link" asp-controller="Classroom" asp-action="Home" asp-route-id="@classUser.ClassroomId" asp-route-loadPartial="BlackBoard">Go to Class</a>
+        </div>
+    </div>
+}
+<style>
+    .bg-blue {
+        background-color: #b4d8ff !important;
+    }
+</style>

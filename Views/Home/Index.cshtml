@@ -1,0 +1,54 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
+@model AftebiClassroom.ViewModels.HomeViewModel
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <div class="row">
+        <div class="col-sm-9">
+            <partial name="_UserClassroomsPartial" />
+        </div>
+        <div class="col-sm-3">
+            <div class="light-grey-box">
+                <partial name="_NotificationsPartial" />
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center alert alert-info">
+    <h1 class="display-4">Welcome to AftebiClassroom </h1>
+        <div class="row no-gutters">
+            <div class="col-sm-5">
+                <img src="~/Aftebi.jpg" title="Aftebi-sucks" class="card-img"  alt="AftebiClassroom">
+            </div>
+            <div class="col-sm-7">
+                <div class="card-body">
+                    <div class="card-body">
+                        <h3 class="display-6" style="text-align: left;">About this app</h3>
+                        <p class="card-text" style="font-size: 20px; text-align: justify;">
+                            What is AFTEBI?
+                            It is a non-profit association, with public utility objectives, constituted to give
+                            substance to one of the largest Technological Schools currently operating in the country
+                            and, with the purpose of training people and empowering companies with these assets,
+                            in technological areas. , at a post-secondary level - currently conferring the Level V
+                            Professional Qualification, through the Technological Specialization Diplomas (DET).
+                        </p>
+                    </div>
+                    <span class="small text-muted">Image Courtesy: <a target="_blank" href="https://www.aftebi.pt/">AFTEBI </a></span>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+   .card-img {
+        height: 60%;
+        margin-top: 50px;}
+</style>

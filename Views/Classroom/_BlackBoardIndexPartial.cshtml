@@ -1,0 +1,110 @@
+﻿@model AftebiClassroom.ViewModels.ClassroomHomeViewModel
+@inject Microsoft.AspNetCore.Identity.UserManager<AppUser> _userManager
+@using AftebiClassroom
+
+<h4>Black Board</h4>
+<hr />
+<div>
+    <form enctype="multipart/form-data" asp-action="BlackBoard" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input asp-for="BlackBoardViewModel.ClassId" type="hidden" value="@ViewData["ClassId"]" />
+        <div class="form-group">
+            <textarea placeholder="Share something with the class!" asp-for="BlackBoardViewModel.content" class="form-control" rows="5" cols="30"></textarea>
+            <span asp-validation-for="BlackBoardViewModel.content" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Upload Files:</label>
+            <div class="col-sm-10">
+                <div class="custom-file">
+                    <input asp-for="BlackBoardViewModel.Files" class="form-control custom-file-input" multiple>
+                    <label class="custom-file-label">Choose Files...</label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Post" class="btn btn-primary" />
+        </div>
+        <script>
+            $(document).ready(function () {
+                $('.custom-file input').change(function (e) {
+                    var files = [];
+                    for (var i = 0; i < $(this)[0].files.length; i++) {
+                        files.push($(this)[0].files[i].name);
+                    }
+                    $(this).next('.custom-file-label').html(files.join(', '));
+                });
+            });
+        </script>
+
+    </form>
+</div>
+
+<div>
+    @{ 
+        int index = -1;
+    } 
+    @foreach (var item in Model.BlackBoards)
+    {
+        index += 1;
+        AppUser user = await _userManager.FindByIdAsync(item.AppUserId);
+    <div class="content-block">
+        <h6>@user</h6>
+        <hr />
+        @CustomHelpers.DisplayWithLinksFor(item.content)
+        @if (item.FilesPaths != null)
+        {
+            string[] files = item.FilesPaths.Split(",");
+            if (files.Count() > 1 || (files.Count() == 1 && files[0].Length != 0))
+            {
+                <hr />
+            }
+            foreach (string file in files)
+            {
+                if (file.Length == 0)
+                {
+                    continue;
+                }
+                var filePath = "~/blackboard/" + file;
+                var filename = file.Substring(file.IndexOf("_") + 1, file.Length - file.IndexOf("_") - 1);
+                var fileUrl = "https://localhost:5001" + "/blackboard/" + file;
+                <a target="_blank" href="@fileUrl">
+                    @filename
+                </a>
+                <br />
+            }
+        }
+        @if (Model.ClassroomUserRole == "Mentor")
+        {
+            <hr/>
+            <a class="text-danger" asp-controller="Classroom" asp-action="DeleteBlackBoard" asp-route-id="@item.Id">Delete this Post</a>
+        }
+        <hr/>
+        <div style="background-color: #eeeeee;padding:20px;height:100%;width:100%;border-bottom-left-radius:inherit;border-bottom-right-radius:inherit">
+            <form class="form-inline" asp-action="AddComment" method="post">
+                <input type="hidden" asp-for="@Model.Comment.BlackBoardId" value="@item.Id" />
+                <input style="width:750px" type="text" class="form-control" asp-for="@Model.Comment.Content" placeholder="Comment on this Post..." />
+                <input type="submit" value="Submit" class="btn btn-light" />
+            </form>
+            @foreach (Comment comment in Model.Comments[index])
+            { 
+                <hr/>
+                <span><b>@comment.AppUser.UserName</b>&nbsp;&nbsp;@comment.TimeCreated.Date.ToLongDateString()</span><br/><br/>
+                <p>@comment.Content</p>
+                @if (Model.ClassroomUserRole == "Mentor")
+                {
+                    <a class="text-danger" href="#">Delete</a>
+                }
+            }
+        </div>
+    </div>
+        <br/>
+    }
+
+</div>
+<style>
+    .content-block {
+        border: 1px solid #dddddd;
+        border-radius: 20px;
+        padding: 20px;
+    }
+</style>
